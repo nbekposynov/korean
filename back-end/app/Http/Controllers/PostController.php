@@ -11,7 +11,8 @@ class PostController extends Controller
     // Method to get all posts
     public function index()
     {
-        $posts = Post::all();
+        // Изменяем запрос, чтобы сначала получать последние посты
+        $posts = Post::orderBy('created_at', 'desc')->get();
     
         $posts->transform(function ($post) {
             // Получаем путь к изображению
@@ -27,9 +28,11 @@ class PostController extends Controller
     
         return response()->json($posts);
     }
+
     // Method to get a single post by ID
     public function show($id)
     {
+        
         $post = Post::find($id);
     
         if ($post) {
@@ -51,6 +54,14 @@ class PostController extends Controller
     public function filter(Request $request): JsonResponse
     {
         $query = Post::query();
+        $query->orderBy('created_at', 'desc');
+
+
+        if ($request->has('korean')) {
+            $koreanValue = $request->input('korean'); // Получаем значение параметра запроса
+            $query->where('korean', $koreanValue); // Фильтруем посты по значению поля korean
+        }
+    
     
         // Фильтр для новостей на выходных
         if ($request->has('weekends')) {
@@ -90,6 +101,29 @@ class PostController extends Controller
         }
     
         return response()->json($posts);
+    }
+
+        public function search(Request $request)
+    {
+        $searchTerm = $request->input('search'); // Получаем поисковый запрос из запроса
+
+        $posts = Post::query()
+            ->where('title', 'like', '%' . $searchTerm . '%') // Ищем в заголовках
+            ->orWhere('excerpt', 'like', '%' . $searchTerm . '%') // Или в описаниях
+            ->get();
+
+            $posts->transform(function ($post) {
+                $imagePath = $post->image;
+    
+                // Формируем URL на основе пути к изображению
+                $post->image = url('/storage/' . $imagePath);
+        
+                // Удаляем ненужные поля или форматируем данные по желанию
+        
+                return $post;
+            });
+
+        return response()->json($posts); // Возвращаем результаты в виде JSON
     }
 
 }
