@@ -29,6 +29,26 @@ class PostController extends Controller
         return response()->json($posts);
     }
 
+    public function indexPaginate()
+    {
+        // Изменяем запрос, чтобы сначала получать последние посты
+        $posts = Post::orderBy('created_at', 'desc')->paginate(6);
+    
+        $posts->transform(function ($post) {
+            // Получаем путь к изображению
+            $imagePath = $post->image;
+    
+            // Формируем URL на основе пути к изображению
+            $post->image = url('/storage/' . $imagePath);
+    
+            // Удаляем ненужные поля или форматируем данные по желанию
+    
+            return $post;
+        });
+    
+        return response()->json($posts);
+    }
+
     // Method to get a single post by ID
     public function show($id)
     {

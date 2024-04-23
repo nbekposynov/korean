@@ -23,6 +23,7 @@ Route::get('/getAlbumPhotoHome', [AlbumController::class, 'indexForHome']);
 
 //Posts
 Route::get('/posts', [PostController::class, 'index']);
+Route::get('/postPaginate', [PostController::class, 'indexPaginate']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
 Route::get('/post/filter', [PostController::class, 'filter']);
 Route::get('/post/search', [PostController::class, 'search']);
